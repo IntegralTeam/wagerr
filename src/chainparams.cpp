@@ -160,7 +160,6 @@ public:
         /** Height or Time Based Activations **/
         nLastPOWBlock = 1001;                   // PoW Phase 3 End
         nModifierUpdateBlock = 1100;            // Modify block on height
-        nZerocoinStartHeight = 1500;            // Zerocoin start height
         nZerocoinAccumulationStartHeight = 1500;// RCP command starts accumulation here - first zerocoin mint occurs at block 87
         nZerocoinStartTime = 1518696182;        // GMT: Thursday, 15. February 2018 12:03:02
         nBlockEnforceSerialRange = 1;           // Enforce serial range starting this block
@@ -330,7 +329,7 @@ public:
         nBlockLastGoodCheckpoint = 350; //Last valid accumulator checkpoint (currently we do not have any) *** TODO ***
         nBlockEnforceInvalidUTXO = 350; //Start enforcing the invalid UTXO's
         nInvalidAmountFiltered = 0; //Amount of invalid coins filtered through exchanges, that should be considered valid
-        nBlockZerocoinV2 = 600; //The block that zerocoin v2 becomes active
+        nBlockZerocoinV2 = 2000600; //The block that zerocoin v2 becomes active
         nEnforceNewSporkKey = 1536019200; //!> Sporks signed after Tuesday September 4, 2018 12:00:00 AM GMT must use the new spork key
         nRejectOldSporkKey = 1538611200; //!> Reject old spork key after October 4, 2018 12:00:00 AM GMT
 
@@ -371,7 +370,7 @@ public:
         //! Modify the testnet genesis block so the timestamp is valid for a later start.
         genesis.nTime = 1518696183;
         genesis.nNonce = 202138;
-/* 
+/*
         for (int nonce = 0; nonce < 100000000; nonce++) {
             genesis.nNonce = nonce;
             uint256 hash = genesis.GetHash();
