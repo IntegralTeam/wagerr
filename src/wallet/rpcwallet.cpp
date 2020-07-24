@@ -801,7 +801,7 @@ void CollectBetData(UniValue& uValue, const PeerlessBetKey& betKey, const CPeerl
     }
 }
 
-UniValue GetBets(uint32_t count, uint32_t from, CWallet *pwalletMain = NULL) {
+UniValue GetBets(uint32_t count, uint32_t from, CWallet *pwalletMain, bool includeWatchonly) {
     UniValue ret(UniValue::VARR);
 
     auto it = bettingsView->bets->NewIterator();
@@ -812,9 +812,13 @@ UniValue GetBets(uint32_t count, uint32_t from, CWallet *pwalletMain = NULL) {
         CBettingDB::BytesToDbType(it->Value(), uniBet);
         CBettingDB::BytesToDbType(it->Key(), key);
 
-        // check bet is mine if needed
-        if (pwalletMain && IsMine(*pwalletMain, uniBet.playerAddress.Get()) == ISMINE_NO)
-            continue;
+        isminetype scriptType = IsMine(*pwalletMain, uniBet.playerAddress.Get());
+        if (pwalletMain) {
+            if (scriptType == ISMINE_NO)
+                continue;
+            if (!(scriptType == ISMINE_WATCH_ONLY && includeWatchonly))
+                continue;
+        }
 
         UniValue uValue(UniValue::VOBJ);
 
@@ -900,13 +904,13 @@ UniValue getallbets(const UniValue& params, bool fHelp)
     if (params.size() == 2)
         from = params[1].get_int();
 
-    return GetBets(count, from);
+    return GetBets(count, from, NULL, false);
 }
 
 
 UniValue getmybets(const UniValue& params, bool fHelp)
 {
-    if (fHelp || params.size() > 2)
+    if (fHelp || params.size() > 3)
         throw std::runtime_error(
                 "getmybets\n"
                 "\nGet bets info for my wallets.\n"
@@ -914,6 +918,7 @@ UniValue getmybets(const UniValue& params, bool fHelp)
                 "\nArguments:\n"
                 "1. count (numeric, optional, default=10) Limit response to last bets number.\n"
                 "2. from (numeric, optional, default=0) The number of bets to skip (from the last)\n"
+                "3. includeWatchonly (bool, optional, default=false) Include bets to watchonly addresses\n"
                 "\nResult:\n"
                 "[\n"
                 "  {\n"
@@ -967,12 +972,16 @@ UniValue getmybets(const UniValue& params, bool fHelp)
         count = params[0].get_int();
 
     uint32_t from = 0;
-    if (params.size()  == 2)
+    if (params.size() >= 2)
         from = params[1].get_int();
+
+    bool includeWatchonly = false;
+    if (params.size() == 3)
+        includeWatchonly = params[2].get_bool();
 
     EnsureWalletIsUnlocked();
 
-    return GetBets(count, from, pwalletMain);
+    return GetBets(count, from, pwalletMain, includeWatchonly);
 }
 
 UniValue getbetbytxid(const UniValue& params, bool fHelp)
