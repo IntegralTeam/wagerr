@@ -415,9 +415,11 @@ private:
 /*
  * Chain Games database structures
  */
+using CChainGamesBetKey = PeerlessBetKey;
 
 class CChainGamesEventDB
 {
+public:
     uint32_t nEventId;
     uint32_t nEntryFee;
 
@@ -786,6 +788,12 @@ public:
     std::unique_ptr<CStorageKV> payoutsInfoStorage;
     std::unique_ptr<CBettingDB> quickGamesBets; // "quickgamesbets"
     std::unique_ptr<CStorageKV> quickGamesBetsStorage;
+    std::unique_ptr<CBettingDB> chainGamesLottoEvents; // "cglottoevents"
+    std::unique_ptr<CStorageKV> chainGamesLottoEventsStorage;
+    std::unique_ptr<CBettingDB> chainGamesLottoBets; // "cglottobets"
+    std::unique_ptr<CStorageKV> chainGamesLottoBetsStorage;
+    std::unique_ptr<CBettingDB> chainGamesLottoResults; // "cglottoresults"
+    std::unique_ptr<CStorageKV> chainGamesLottoResultsStorage;
 
     // default constructor
     explicit CBettingsView() { }

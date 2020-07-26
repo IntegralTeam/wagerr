@@ -234,3 +234,45 @@ void GetQuickGamesBetPayouts(CBettingsView& bettingsViewCache, const int nNewBlo
         bettingsViewCache.quickGamesBets->Update(pair.first, pair.second);
     }
 }
+
+void GetCGLottoBetPayoutsV3(CBettingsView &bettingsViewCache, const int nNewBlockHeight, std::vector<CBetOut>& vExpectedPayouts, std::vector<CPayoutInfoDB>& vPayoutsInfo)
+{
+    const int nLastBlockHeight = nNewBlockHeight - 1;
+
+    // Get all the results posted in the prev block.
+    std::vector<CChainGamesResultDB> results;
+
+    GetCGLottoEventResults(nLastBlockHeight, results);
+
+    bool fWagerrProtocolV3 = nLastBlockHeight >= Params().WagerrProtocolV3StartHeight();
+
+    LogPrintf("Start generating payouts...\n");
+
+    for (auto result : results) {
+
+        LogPrintf("Looking for bets of eventId: %lu\n", result.nEventId);
+
+        // look bets at last 14 days
+        uint32_t startHeight = nLastBlockHeight >= Params().BetBlocksIndexTimespan() ? nLastBlockHeight - Params().BetBlocksIndexTimespan() : 0;
+
+        auto it = bettingsViewCache.bets->NewIterator();
+        std::vector<std::pair<CChainGamesBetKey, CChainGamesBetDB>> vEntriesToUpdate;
+        for (it->Seek(CBettingDB::DbTypeToBytes(CChainGamesBetKey{static_cast<uint32_t>(startHeight), COutPoint()})); it->Valid(); it->Next()) {
+            PeerlessBetKey uniBetKey;
+            CChainGamesBetDB uniBet;
+            CBettingDB::BytesToDbType(it->Key(), uniBetKey);
+            CBettingDB::BytesToDbType(it->Value(), uniBet);
+
+            if (fWagerrProtocolV3) continue;
+
+        }
+        for (auto pair : vEntriesToUpdate) {
+            bettingsViewCache.bets->Update(pair.first, pair.second);
+        }
+    }
+
+    // GetPLRewardPayouts(nNewBlockHeight, vExpectedPayouts, vPayoutsInfo);
+
+    LogPrintf("Finished generating payouts...\n");
+
+}
